@@ -351,7 +351,15 @@ func (s *session) EnqueueBytesAndSend(msg []byte) {
 
 func (s *session) sendBytes(msg []byte) {
 	s.log.OnOutgoing(msg)
-	s.messageOut <- msg
+
+	select {
+	case s.messageOut <- msg:
+	default:
+		// close the client connection if they are reading too slowly or not reading at all
+		s.log.OnEvent("client buffer is full. closing channel")
+		close(s.messageOut)
+	}
+
 	s.stateTimer.Reset(s.HeartBtInt)
 }
 
