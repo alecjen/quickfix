@@ -325,7 +325,7 @@ func (a *Acceptor) handleConnection(netConn net.Conn) {
 
 	a.sessionAddr.Store(sessID, netConn.RemoteAddr())
 	msgIn := make(chan fixIn)
-	msgOut := make(chan []byte)
+	msgOut := make(chan []byte, 1024)
 
 	if err := session.connect(msgIn, msgOut); err != nil {
 		a.globalLog.OnEventf("Unable to accept %v", err.Error())
